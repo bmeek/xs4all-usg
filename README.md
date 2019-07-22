@@ -1,5 +1,5 @@
 # xs4all-usg
-UniFi Security Gateway, Xs4all, IPTV,
+UniFi Security Gateway, Xs4all, IPTV, Fiber.
 
 Many thanks go to:
 - https://free2wifi.nl/
