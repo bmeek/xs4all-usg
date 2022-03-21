@@ -1,4 +1,54 @@
-{ 
+{
+    "system": {
+        "offload": {
+            "ipv4": {
+                     "forwarding": "enable",
+                     "gre": "enable",
+                     "pppoe": "enable",
+                     "vlan": "enable"
+            },
+            "ipv6": {
+                    "forwarding": "enable",
+                    "pppoe": "enable",
+                    "vlan": "disable"
+            }
+        }
+    },
+    "firewall": {
+        "ipv6-name": {
+            "WANv6_LOCAL" : {
+                "rule": {
+                    "1": {
+                        "action": "accept",
+                        "description": "Allow ICMPv6",
+                        "log": "enable",
+                        "protocol": "icmpv6"
+                    },
+                    "2": {
+                        "action": "accept",
+                        "description": "DHCPv6",
+                        "destination": {
+                                "port": "546"
+                        },
+                        "protocol": "udp",
+                        "source": {
+                                "port": "547"
+                        }
+                    }
+                }
+            },
+            "WANv6_IN" : {
+                "rule": {
+                    "1": {
+                            "action": "accept",
+                            "description": "Allow ICMPv6",
+                            "log": "enable",
+                            "protocol": "icmpv6"
+                    }
+                }
+            }
+        }
+    },
     "interfaces": {
         "ethernet": {
             "eth0": {
@@ -7,12 +57,13 @@
                     "default-route-distance": "1",
                     "name-server": "no-update"
                 },
+                "description": "WAN",
                 "vif": {
                     "4": {
                         "address": [
                             "dhcp"
                         ],
-                        "description": "Xs4all IPTV",
+                        "description": "IPTV",
                         "dhcp-options": {
                             "client-option": [
                                 "send vendor-class-identifier &quot;IPTV_RG&quot;;",
@@ -24,11 +75,10 @@
                         },
                         "ip": {
                             "source-validation": "loose"
-                        }
-  
+                        },
+                        "mtu": "1500"
                     },
                     "6": {
-                        "description": "Xs4all fiber",
                         "firewall": {
                             "in": {
                                 "ipv6-name": "WANv6_IN",
@@ -45,7 +95,22 @@
                         },
                         "pppoe": {
                             "2": {
-                                "default-route": "auto",
+                                "dhcpv6-pd": {
+                                    "no-dns": "''",
+                                    "pd": {
+                                        "0": {
+                                            "interface": {
+                                                "eth1": {
+                                                    "host-address": "::1",
+                                                    "prefix-id": ":1",
+                                                    "service": "slaac"
+                                                }
+                                            },
+                                            "prefix-length": "/48"
+                                        }
+                                    },
+                                    "rapid-commit": "disable"
+                                },
                                 "firewall": {
                                     "in": {
                                         "ipv6-name": "WANv6_IN",
@@ -60,18 +125,56 @@
                                         "name": "WAN_OUT"
                                     }
                                 },
+                                "ipv6": {
+                                    "address": {
+                                        "autoconf": "''"
+                                    },
+                                    "dup-addr-detect-transmits": "1",
+                                    "enable": "''"
+                                },
+                                "default-route": "auto",                                
+                                "mtu": "1500",
                                 "name-server": "auto",
                                 "password": "kpn",
                                 "user-id": "kpn"
                             }
                         }
                     }
-  
+                }
+            },
+            "eth1": {
+                "description": "LAN",
+                "ipv6": {
+                    "address": {
+                        "autoconf": "''"
+                    },
+                    "dup-addr-detect-transmits": "1",
+                    "router-advert": {
+                        "cur-hop-limit": "64",
+                        "link-mtu": "0",
+                        "managed-flag": "true",
+                        "max-interval": "600",
+                        "name-server": [
+                        	"2606:4700:4700::1111",
+                        	"2606:4700:4700::1001"
+                        ],
+                        "other-config-flag": "false",
+                        "prefix": {
+                            "::/64": {
+                                "autonomous-flag": "true",
+                                "on-link-flag": "true",
+                                "valid-lifetime": "2592000"
+                            }
+                        },
+                        "radvd-options": "RDNSS 2606:4700:4700::1111 2606:4700:4700::1001 {};",
+                        "reachable-time": "0",
+                        "retrans-timer": "0",
+                        "send-advert": "true"
+                    }
                 }
             }
         }
     },
-    
     "protocols": {
         "igmp-proxy": {
             "interface": {
@@ -83,29 +186,39 @@
                     "threshold": "1"
                 },
                 "eth1": {
+                    "role": "disabled",
+                    "threshold": "1"
+                },
+                "eth1.10": {
+                    "role": "disabled",
+                    "threshold": "1"
+                },
+                "eth1.20": {
                     "alt-subnet": [
-                        "0.0.0.0/24"
+                        "0.0.0.0/0"
                     ],
                     "role": "downstream",
+                    "threshold": "1"
+                },
+                "eth1.200": {
+                    "role": "disabled",
                     "threshold": "1"
                 }
             }
         },
         "static": {
-            "route": {
-                "213.75.112.0/21": {
-                    "next-hop": {
-                        "10.119.58.1": "''"
+            "interface-route6": {
+                "::/0": {
+                    "next-hop-interface": {
+                        "pppoe2": "''"
                     }
                 }
             }
         }
     },
-    
     "port-forward": {
         "wan-interface": "pppoe2"
     },
-  
     "service": {
         "dns": {
             "forwarding": {
@@ -117,9 +230,9 @@
         "nat": {
             "rule": {
                 "5000": {
-                    "description": "MASQ corporate_network to IPTV network",
+                    "description": "MASQ all traffic to IPTV network",
                     "destination": {
-                        "address": "213.75.112.0/21"
+                        "address": "0.0.0.0/0"
                     },
                     "log": "disable",
                     "outbound-interface": "eth0.4",
@@ -134,19 +247,6 @@
                 },
                 "6003": {
                     "outbound-interface": "pppoe2"
-                }
-            }
-        }
-    },
-    
-    "system": {
-        "task-scheduler": {
-            "task": {
-                "updateIPTVroute": {
-                    "executable": {
-                        "path": "/config/scripts/tvroute.sh"
-                    },
-                    "interval": "60m"
                 }
             }
         }
