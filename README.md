@@ -1,5 +1,5 @@
-# xs4all-usg
-UniFi Security Gateway, USG, Xs4all, IPTV, Fiber.
+# KPN-usg
+UniFi Security Gateway, USG, KPN, IPTV, Fiber, IPv4, IPv6.
 
 Many thanks/credits go to:
 - https://free2wifi.nl/
