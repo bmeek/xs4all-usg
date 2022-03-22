@@ -1,5 +1,5 @@
 # KPN-usg
-UniFi Security Gateway, USG, KPN, IPTV, Fiber, IPv4, IPv6.
+UniFi Security Gateway, USG, KPN, IPTV, Fiber, IPv4, IPv6, VLAN.
 
 Many thanks/credits go to:
 - https://free2wifi.nl/
